@@ -5,6 +5,8 @@
 #include <fstream> // Include the file stream library
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
+#ifndef RADIUS
+#define RADIUS 0.08
 #endif
 Timer timer_wheel1;
 int previous_pulse_count_M1  = 0;
@@ -235,7 +237,7 @@ private:
     float dt; //
 
 public:
-    PIDController(float Kp, float Ki, float Kd) : Kp(Kp), Ki(Ki), Kd(Kd), setpoint(0), integral(0), prevError(0) {}
+    PIDController(float Kp) : Kp(Kp), Ki(Ki), Kd(Kd), setpoint(0), integral(0), prevError(0) {}
 
     void setSetpoint(float setpoint) {
         this->setpoint = setpoint;
@@ -246,7 +248,7 @@ float compute(float velocity) {
     dt = 0.1;
     float derivative = (error - prevError) / dt;
     prevError = error;
-    float output = (Kp * error + Ki * integral)/10000;
+    float output = (Kp * error + Ki * integral+ Kd * derivative)/1000;
 
 
     return output;
@@ -267,12 +269,10 @@ int main() {
     MotorEncoder motorEncoders(PC_5, PC_4, PC_2, PC_3, 1024, QEI::X4_ENCODING);
     // Initialize PID controllers for each wheel
     
-    PIDController pidControllerLeft(5,10 , 1); // Adjust PID constants as needed
-    PIDController pidControllerRight(5,10,1); // Adjust PID constants as needed
-    PIDController pidControllerLeft_turn(0.1, 0.01, 0.01); // Adjust PID constants as needed
-    PIDController pidControllerRight_turn(0.1, 0.01, 0.01); // Adjust PID constants as needed#
-        pidControllerLeft.setSetpoint(1.5);
-        pidControllerRight.setSetpoint(1.5);
+    PIDController pidControllerLeft(1); // Adjust PID constants as needed
+    PIDController pidControllerRight(1); // Adjust PID constants as needed
+    pidControllerLeft.setSetpoint(1.5);
+    pidControllerRight.setSetpoint(1.5);
 
 Ticker ticker;    
 ticker.attach(callback(&motorEncoders, &MotorEncoder::count_rate_M1), 0.01); // Attach count_rate_M1
@@ -299,7 +299,7 @@ lcd.cls();
         float pidOutputRight = pidControllerRight.compute(wheelVelocity_M2);
         float dutyCycleLeft =  0.5 +pidOutputLeft; // Base duty cycle + PID output
         float dutyCycleRight = 0.5 + pidOutputRight; // Base duty cycle + PID output
-       
+      
    
          pc.printf("left motor info\r\n");
          pc.printf("////////////////////////////\r\n");
@@ -308,14 +308,14 @@ lcd.cls();
          pc.printf("dutyCycleLeft is %.2f\r\n",dutyCycleLeft);
          pc.printf("pidOutputLeft is %.2f\r\n",pidOutputLeft);
          pc.printf("////////////////////////////\r\n");
-
+        buggy.line2(dutyCycleLeft,50,dutyCycleRight,50);
 
         pc.printf("Right motor info\r\n");
         pc.printf("////////////////////////////\r\n");
         pc.printf("speed_right is %.2f\r\n",wheelVelocity_M2);
         pc.printf("getPulses_M2 is %i\r\n",getPulses_M2);
-        pc.printf("dutyCycleRight is %.2f\r\n",dutyCycleRight);
-        pc.printf("pidOutputRight is %.2f\r\n",pidOutputRight);
+        pc.printf("dutyCycleRight is %.5f\r\n",dutyCycleRight);
+        pc.printf("pidOutputRight is %.5f\r\n",pidOutputRight);
         pc.printf("////////////////////////////\r\n");
          
       wait(1);
