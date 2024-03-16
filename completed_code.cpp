@@ -412,7 +412,7 @@ int main() {
           buggy.line2(dutyCycleLeft + correction,50,dutyCycleRight,50);
        }
           
-if (wheelVelocity_M1 == 0 && wheelVelocity_M2 == 0 && line_detected == 1) {
+if (wheelVelocity_M1 < wheelVelocity_M1_past - 0.3 && wheelVelocity_M2 == wheelVelocity_M2_past - 0.3 && line_detected == 1) {
     pidControllerLeft.setSetpoint(2.5);
     pidControllerRight.setSetpoint(2.5);
 }
