@@ -150,7 +150,7 @@ public:
         for (int i = 0; i < 5; ++i) {
             x_sum += sensor_positions[i] * sensor_outputs[i];
             y_sum += sensor_outputs[i];
-            if(CNYesc[i] > 200){       //detecta si hay una linea
+            if(CNYesc[i] > 750){       //needs testing
              line_detected = 1;
             }     
 
@@ -412,6 +412,10 @@ int main() {
           buggy.line2(dutyCycleLeft + correction,50,dutyCycleRight,50);
        }
           
+if (wheelVelocity_M1 == 0 && wheelVelocity_M2 == 0 && line_detected == 1) {
+    pidControllerLeft.setSetpoint(2.5);
+    pidControllerRight.setSetpoint(2.5);
+}
     pc.printf("Sensor info\r\n");
     pc.printf("////////////////////////////\r\n");
     pc.printf("correction is %.2f\r\n",correction);
