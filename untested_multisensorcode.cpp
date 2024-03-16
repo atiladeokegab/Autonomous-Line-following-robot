@@ -181,7 +181,9 @@ int main() {
       pc.printf("SR is %.2f\r\n",  CNYesc[3]);
       pc.printf("SRR is %.2f\r\n",CNYesc[4]);
       pc.printf("correction is %.2f\r\n",correction);
+      pc.printf("line_detected is %.2f\r\n",line_detected);
       pc.printf("line_postion is %.2f\r\n",line_position);
+      pc.printf("last_dir is %.2f\r\n",last_dir);
       pc.printf("////////////////////////////\r\n");
 
       wait(1);
