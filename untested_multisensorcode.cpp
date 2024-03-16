@@ -1,8 +1,7 @@
 #include "mbed.h"
 #include "QEI.h"
 #include "C12832.h"
-#include <iostream>
-#include <fstream> // Include the file stream library
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -16,7 +15,8 @@
        bool line_detected = 1;
        float correction = 0;
        float value = 0;
-
+       bool last_dir ;
+    int CNYesc[5];
 Serial pc(USBTX, NC);
 
 class Sensor {
@@ -38,7 +38,7 @@ private:
     Sensor SL;
     Sensor SR;
     Sensor SRR;
-
+     // Array to store sensor readings
     float min_values[5]; // Array to store minimum values for each sensor
     float max_values[5]; // Array to store maximum values for each sensor
 
@@ -72,7 +72,10 @@ public:
             normalize(SR.value(), min_values[3], max_values[3]),
             normalize(SRR.value(), min_values[4], max_values[4])
         };
-
+        // Store sensor readings in CNYesc[]
+        for (int i = 0; i < 5; ++i) {
+            CNYesc[i] = sensor_outputs[i];
+        }
         // Calculate weighted sum
         for (int i = 0; i < 5; ++i) {
             x_sum += sensor_positions[i] * sensor_outputs[i];
@@ -158,28 +161,27 @@ int main() {
     sensorupdate_M1.attach(callback(&sensorManager, &SensorManager::calculateError), 0.01); // Attach count_rate_M1
 
     while (true) {
-     float line_postion = sensorManager.calculateWeightedAverage() ;
+     float line_position = sensorManager.calculateWeightedAverage() ;
               if(line_detected == 1) {
             // If there is a line_detected
-            line_postion = line_postion - (5 - 1) / 2 * 1000; // Convert to error range
-            last_dir = (line_postion >= 0) ? 1 : 0; // Update the last direction
+            line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
+            last_dir = (line_position >= 0) ? 1 : 0; // Update the last direction
         } else {
             // If no line is detected
-            line_postion = 0 + (5 - 1) * 1000 * last_dir; // Use last direction information
-            line_postion = line_postion - (5 - 1) / 2 * 1000; // Convert to error range
+            line_position = 0 + (5 - 1) * 1000 * last_dir; // Use last direction information
+            line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
         }
-        float correction = PIDController_sensors.compute(line_position, last_line_position);
-        last_line_position = line_position; // Update last_line_position
+        //float correction = PIDController_sensors.compute(line_position, last_line_position);
+        //last_line_position = line_position; // Update last_line_position
 
-        
       pc.printf("////////////////////////////\r\n");
-      pc.printf("Sll is %.2f\r\n",SLL.value());
-      pc.printf("Sl is %.2f\r\n", SL.value());       
-      pc.printf("SC is %.2f\r\n", SC.value());
-      pc.printf("SR is %.2f\r\n", SR.value());
-      pc.printf("SRR is %.2f\r\n",SRR.value());
+      pc.printf("Sll is %.2f\r\n", CNYesc[1]);
+      pc.printf("Sl is %.2f\r\n",  CNYesc[2]);       
+      pc.printf("SC is %.2f\r\n",  CNYesc[0]);
+      pc.printf("SR is %.2f\r\n",  CNYesc[3]);
+      pc.printf("SRR is %.2f\r\n",CNYesc[4]);
       pc.printf("correction is %.2f\r\n",correction);
-      pc.printf("line_postion is %.2f\r\n",line_postion);
+      pc.printf("line_postion is %.2f\r\n",line_position);
       pc.printf("////////////////////////////\r\n");
 
       wait(1);
