@@ -245,7 +245,7 @@ public:
 float compute(float velocity) {
     float error = setpoint - velocity;
     integral += error;
-    dt = 0.1;
+    dt = 0.01;
     float derivative = (error - prevError) / dt;
     prevError = error;
     float output = (Kp * error + Ki * integral+ Kd * derivative)/1000;
