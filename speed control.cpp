@@ -298,7 +298,7 @@ lcd.cls();
         float pidOutputLeft = pidControllerLeft.compute(wheelVelocity_M1);
         float pidOutputRight = pidControllerRight.compute(wheelVelocity_M2);
         float dutyCycleLeft =  0.5 +pidOutputLeft; // Base duty cycle + PID output
-        float dutyCycleRight = 0.5 - pidOutputRight; // Base duty cycle + PID output
+        float dutyCycleRight = 0.5 - pidOutputRight; // Base duty cycle - PID output
       
    
          pc.printf("left motor info\r\n");
