@@ -172,8 +172,7 @@ int main() {
             line_position = 0 + (5 - 1) * 1000 * last_dir; // Use last direction information
             line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
         }
-        float correction = PIDController_sensors.compute(line_position, last_line_position);
-        last_line_position = line_position; // Update last_line_position
+        float correction = PIDController_sensors.compute(line_position, 0);
 
       pc.printf("////////////////////////////\r\n");
       pc.printf("Sll is %i\r\n", CNYesc[1]);
