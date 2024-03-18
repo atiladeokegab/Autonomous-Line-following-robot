@@ -97,12 +97,6 @@ public:
         return (value - min_value) / (max_value - min_value);
     }
 
-    // Function to calculate error
-    void calculateError() {
-        float weighted_average = calculateWeightedAverage();
-        float errorValue  = 1000 * (weighted_average - 4350);
-        // Handle error calculation as needed
-    }
 };
 
 
