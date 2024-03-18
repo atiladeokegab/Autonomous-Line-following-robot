@@ -269,8 +269,8 @@ int main() {
     MotorEncoder motorEncoders(PC_5, PC_4, PC_2, PC_3, 1024, QEI::X4_ENCODING);
     // Initialize PID controllers for each wheel
     
-    PIDController pidControllerLeft(1); // Adjust PID constants as needed
-    PIDController pidControllerRight(1); // Adjust PID constants as needed
+    PIDController pidControllerLeft(0.002,0,0.001); // Adjust PID constants as needed
+    PIDController pidControllerRight(0.002,0,0.001); // Adjust PID constants as needed
     pidControllerLeft.setSetpoint(1.5);
     pidControllerRight.setSetpoint(1.5);
 
