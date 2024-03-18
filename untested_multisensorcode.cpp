@@ -10,7 +10,6 @@
 #define SC_pin  PA_4
 #define SL_pin  PB_0
 #define SLL_pin PC_1
-
 #endif
        bool line_detected = 0;
        float correction = 0;
@@ -20,6 +19,11 @@
        int CNYesc[5];
        Serial pc(USBTX, NC);
 
+// Function to normalize sensor output
+float normalize(float value, float min_value, float max_value) {
+// Perform normalization
+return (value - min_value) / (max_value - min_value);
+}
 class Sensor {
 private:
     AnalogIn inputSignal;
@@ -62,7 +66,7 @@ public:
 
     // Function to calculate weighted average
     float calculateWeightedAverage() {
-        float x_sum = 0, y_sum = 0;
+        float weighted_sum  = 0, sum_weights = 0;
 
         // Sensor positions and their output values
         float sensor_positions[5] = {0, 1000, 2000, 3000, 4000};
@@ -79,22 +83,15 @@ public:
         }
         // Calculate weighted sum
         for (int i = 0; i < 5; ++i) {
-            x_sum += sensor_positions[i] * CNYesc[i];
-            y_sum += CNYesc[i];
+            weighted_sum += sensor_positions[i] * sensor_outputs[i];
+            sum_weights += sensor_outputs[i];
             if(CNYesc[i] > 0.70){       
              line_detected = 1;
             }     
 
         }
         // Calculate weighted average
-        return x_sum / y_sum;
-    }
-
-    
-    // Function to normalize sensor output
-    float normalize(float value, float min_value, float max_value) {
-        // Perform normalization
-        return (value - min_value) / (max_value - min_value);
+        return weighted_sum / sum_weights;
     }
 
 };
@@ -115,7 +112,7 @@ public:
 
 
 
-    float compute(float line_position,float last_line_position) {
+    float compute(float line_position) {
         /*
 ************************************************************************
 The funtions is to calcilate the required voltage to get the dc motot to
@@ -140,13 +137,22 @@ the required speed.
 
 
 
+// Define constants for array indices
+const int SC_INDEX = 0;
+const int SLL_INDEX = 1;
+const int SL_INDEX = 2;
+const int SR_INDEX = 3;
+const int SRR_INDEX = 4;
 
+
+
+//main
 int main() {
-    SensorManager sensorManager(SRR_pin,SR_pin,SC_pin,SL_pin,SLL_pin);
+    SensorManager sensorManager(SC_pin,SLL_pin,SL_pin,SR_pin,SRR_pin);
     PIDController_Sensors PIDController_sensors(0.1, 0.01); // Adjust PID constants as needed
     //
-    Ticker sensorupdate_M1;
-    sensorupdate_M1.attach(callback(&sensorManager, &SensorManager::calculateError), 0.01); // Attach count_rate_M1
+    //Ticker sensorupdate_M1;
+    //sensorupdate_M1.attach(callback(&sensorManager, &SensorManager::calculateError), 0.01); // Attach count_rate_M1
 
     while (true) {
      float line_position = sensorManager.calculateWeightedAverage() ;
@@ -159,14 +165,14 @@ int main() {
             line_position = 0 + (5 - 1) * 1000 * last_dir; // Use last direction information
             line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
         }
-        float correction = PIDController_sensors.compute(line_position, 0);
+        float correction = PIDController_sensors.compute(line_position);
 
       pc.printf("////////////////////////////\r\n");
-      pc.printf("Sll is %i\r\n", CNYesc[1]);
-      pc.printf("Sl is %i\r\n",  CNYesc[2]);       
-      pc.printf("SC is %i\r\n",  CNYesc[0]);
-      pc.printf("SR is %.i\r\n",  CNYesc[3]);
-      pc.printf("SRR is %i\r\n",CNYesc[4]);
+      pc.printf("Sll is %i\r\n",CNYesc[SLL_INDEX]);
+      pc.printf("Sl is %i\r\n", CNYesc[SL_INDEX]);       
+      pc.printf("SC is %i\r\n",  CNYesc[SC_INDEX]);
+      pc.printf("SR is %.i\r\n",  CNYesc[SR_INDEX]);
+      pc.printf("SRR is %i\r\n",CNYesc[SRR_INDEX]);
       pc.printf("correction is %.2f\r\n",correction);
       pc.printf("line_detected is %d\r\n",line_detected);
       pc.printf("line_postion is %.2f\r\n",line_position);
