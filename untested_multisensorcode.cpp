@@ -156,15 +156,14 @@ int main() {
 
     while (true) {
      float line_position = sensorManager.calculateWeightedAverage() ;
-              if(line_detected ) {
-            // If there is a line_detected
-            line_position = line_position -(5 - 1) / 2 * 1000; // Convert to error range
-            last_dir = (line_position >= 0) ? 1 : 0; // Update the last direction
-        } else {
-            // If no line is detected
-            line_position = 0 + (5 - 1) * 1000 * last_dir; // Use last direction information
-            line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
-        }
+             if (line_detected) {
+        // If a line is detected
+        line_position -= 2000; // Assuming the position range is [-2000, 2000]
+        last_dir = (line_position >= 0) ? 1 : 0; // Update the last direction
+    } else {
+        // If no line is detected, maintain the previous direction
+        line_position = last_dir ? 2000 : -2000; // Assuming the position range is [-2000, 2000]
+    }
         float correction = PIDController_sensors.compute(line_position);
 
       pc.printf("////////////////////////////\r\n");
