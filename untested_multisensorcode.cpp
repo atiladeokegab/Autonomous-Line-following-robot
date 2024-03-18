@@ -75,13 +75,13 @@ public:
         };
         // Store sensor readings in CNYesc[]
         for (int i = 0; i < 5; ++i) {
-            CNYesc[i] = int(sensor_outputs[i]);
+            CNYesc[i] = int(sensor_outputs[i] *256);
         }
         // Calculate weighted sum
         for (int i = 0; i < 5; ++i) {
-            x_sum += sensor_positions[i] * sensor_outputs[i];
-            y_sum += sensor_outputs[i];
-            if(CNYesc[i] > 200){       
+            x_sum += sensor_positions[i] * CNYesc[i];
+            y_sum += CNYesc[i];
+            if(CNYesc[i] > 205){       
              line_detected = 1;
             }     
 
