@@ -156,7 +156,7 @@ int main() {
 
     while (true) {
      float line_position = sensorManager.calculateWeightedAverage() ;
-              if(line_detected == 1) {
+              if(line_detected ) {
             // If there is a line_detected
             line_position = line_position -(5 - 1) / 2 * 1000; // Convert to error range
             last_dir = (line_position >= 0) ? 1 : 0; // Update the last direction
