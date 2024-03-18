@@ -137,7 +137,15 @@ int main() {
 
     while (true) {
 
-        float value = sensorManager.calculateWeightedAverage() ;
+float value = sensorManager.calculateWeightedAverage() ;
+        // Scale down the output
+value /= 2;
+
+// Shift the scaled output
+value -= 1000;
+
+// Multiply the shifted output by 2
+value *= 2;
   
       pc.printf("////////////////////////////\r\n");
       pc.printf("Sll is %.2f\r\n",SLL.value());
