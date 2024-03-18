@@ -129,18 +129,11 @@ the required speed.
 ************************************************************************
 */
         float proportional_correction  =Kp*line_position;
-        //float error = setpoint - velocity;
-        //float error = desired velocity - actual velocity;
         dt= 0.01;
-
         //float e integral = e intergral + e * change in time
-
-        float derivative_correction  = Kd* (line_position  - last_line_position) / dt;
-        last_line_position = line_position;
+        float derivative_correction  = Kd* (line_position) / dt;
         //float output = Kp * error ;
-        float correction = proportional_correction + derivative_correction;
-
-        
+        float correction = proportional_correction + derivative_correction; 
         return correction;
     }
 
