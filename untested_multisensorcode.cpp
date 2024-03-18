@@ -12,12 +12,13 @@
 #define SLL_pin PC_1
 
 #endif
-       bool line_detected = 1;
+       bool line_detected = 0;
        float correction = 0;
        float value = 0;
-       bool last_dir ;
-    int CNYesc[5];
-Serial pc(USBTX, NC);
+       bool last_dir= 0 ;
+       float last_line_position = 0;
+       int CNYesc[5];
+       Serial pc(USBTX, NC);
 
 class Sensor {
 private:
@@ -27,7 +28,7 @@ public:
     Sensor(PinName Pin) : inputSignal(Pin) {}
 
     float value(void) {
-        return (inputSignal.read() * 1000);
+        return (inputSignal.read() * 256);
     }
 };
 
@@ -74,13 +75,13 @@ public:
         };
         // Store sensor readings in CNYesc[]
         for (int i = 0; i < 5; ++i) {
-            CNYesc[i] = sensor_outputs[i];
+            CNYesc[i] = int(sensor_outputs[i]);
         }
         // Calculate weighted sum
         for (int i = 0; i < 5; ++i) {
             x_sum += sensor_positions[i] * sensor_outputs[i];
             y_sum += sensor_outputs[i];
-            if(CNYesc[i] > 200){       //detecta si hay una linea
+            if(CNYesc[i] > 200){       
              line_detected = 1;
             }     
 
@@ -164,26 +165,26 @@ int main() {
      float line_position = sensorManager.calculateWeightedAverage() ;
               if(line_detected == 1) {
             // If there is a line_detected
-            line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
+            line_position = line_position -(5 - 1) / 2 * 1000; // Convert to error range
             last_dir = (line_position >= 0) ? 1 : 0; // Update the last direction
         } else {
             // If no line is detected
             line_position = 0 + (5 - 1) * 1000 * last_dir; // Use last direction information
             line_position = line_position - (5 - 1) / 2 * 1000; // Convert to error range
         }
-        //float correction = PIDController_sensors.compute(line_position, last_line_position);
-        //last_line_position = line_position; // Update last_line_position
+        float correction = PIDController_sensors.compute(line_position, last_line_position);
+        last_line_position = line_position; // Update last_line_position
 
       pc.printf("////////////////////////////\r\n");
-      pc.printf("Sll is %.2f\r\n", CNYesc[1]);
-      pc.printf("Sl is %.2f\r\n",  CNYesc[2]);       
-      pc.printf("SC is %.2f\r\n",  CNYesc[0]);
-      pc.printf("SR is %.2f\r\n",  CNYesc[3]);
-      pc.printf("SRR is %.2f\r\n",CNYesc[4]);
+      pc.printf("Sll is %i\r\n", CNYesc[1]);
+      pc.printf("Sl is %i\r\n",  CNYesc[2]);       
+      pc.printf("SC is %i\r\n",  CNYesc[0]);
+      pc.printf("SR is %.i\r\n",  CNYesc[3]);
+      pc.printf("SRR is %i\r\n",CNYesc[4]);
       pc.printf("correction is %.2f\r\n",correction);
-      pc.printf("line_detected is %.2f\r\n",line_detected);
+      pc.printf("line_detected is %d\r\n",line_detected);
       pc.printf("line_postion is %.2f\r\n",line_position);
-      pc.printf("last_dir is %.2f\r\n",last_dir);
+      pc.printf("last_dir is %d\r\n",last_dir);
       pc.printf("////////////////////////////\r\n");
 
       wait(1);
