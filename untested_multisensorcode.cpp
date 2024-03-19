@@ -18,6 +18,7 @@
        float last_line_position = 0;
        int CNYesc[5];
        Serial pc(USBTX, NC);
+       const float LINE_THRESHOLD = 0.70;
 
 // Function to normalize sensor output
 float normalize(float value, float min_value, float max_value) {
@@ -156,7 +157,14 @@ int main() {
 
     while (true) {
      float line_position = sensorManager.calculateWeightedAverage() ;
-             if (line_detected) {
+     bool any_sensor_detects_line = false;
+    for (int i = 0; i < 5; ++i) {
+        if (CNYesc[i] > LINE_THRESHOLD) {
+            any_sensor_detects_line = true;
+            break;
+        }
+    }
+       if (any_sensor_detects_line) {
         // If a line is detected
         line_position -= 2000; // Assuming the position range is [-2000, 2000]
         last_dir = (line_position >= 0) ? 1 : 0; // Update the last direction
@@ -174,6 +182,7 @@ int main() {
       pc.printf("SRR is %i\r\n",CNYesc[SRR_INDEX]);
       pc.printf("correction is %.2f\r\n",correction);
       pc.printf("line_detected is %d\r\n",line_detected);
+      pc.printf("line_detected is %d\r\n",any_sensor_detects_line); // Indicate whether any sensor detects the line
       pc.printf("line_postion is %.2f\r\n",line_position);
       pc.printf("last_dir is %d\r\n",last_dir);
       pc.printf("////////////////////////////\r\n");
