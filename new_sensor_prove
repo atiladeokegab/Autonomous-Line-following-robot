@@ -1,0 +1,211 @@
+#include "mbed.h"
+#include "QEI.h"
+#include "C12832.h"
+#include <iostream>
+#include <fstream> // Include the file stream library
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#define SRR_pin PA_0
+#define SR_pin  PA_1
+#define SC_pin  PA_4
+#define SL_pin  PB_0
+#define SLL_pin PC_1
+#endif
+static float sensor_output_SC = 0, sensor_output_SLL=0, sensor_output_SL=0, sensor_output_SR=0, sensor_output_SRR=0;
+static float min_SC = 255, min_SLL = 255, min_SL = 255, min_SR = 255, min_SRR = 255;
+
+static float max_SC = 0, max_SLL = 0, max_SL = 0, max_SR = 0, max_SRR = 0;
+Timer timer_wheel1;
+int previous_pulse_count_M1 = 0;
+Timer timer_wheel2;
+int previous_pulse_count_M2 = 0;
+float correction = 0;
+float value = 0;
+
+Serial pc(USBTX, NC);
+
+class Sensor {
+private:
+    AnalogIn inputSignal;
+
+public:
+    Sensor(PinName Pin) : inputSignal(Pin) {}
+
+    float value(void) {
+        return (inputSignal.read() * 256);
+    }
+};
+
+class SensorManager {
+private:
+    Sensor SC;
+    Sensor SLL;
+    Sensor SL;
+    Sensor SR;
+    Sensor SRR;
+
+public:
+    SensorManager(PinName SC_pin, PinName SLL_pin, PinName SL_pin, PinName SR_pin, PinName SRR_pin)
+        : SC(SC_pin), SLL(SLL_pin), SL(SL_pin), SR(SR_pin), SRR(SRR_pin) {}
+
+    // Function to calculate weighted average
+    float calculateWeightedAverage() {
+        float x_sum = 0, y_sum = 0, result = 0;
+        // Sensor positions and their output values
+        float sensor_positions[5] = {0, -2000, -1000, 1000, 2000};
+        float sensor_outputs[5] = {SC.value(), SRR.value(), SR.value(), SL.value(), SLL.value()};
+
+        // Calculate weighted sum
+        for (int i = 0; i < 5; ++i) {
+            x_sum += sensor_positions[i] * sensor_outputs[i];
+            y_sum += sensor_outputs[i];
+        }
+        result = x_sum / y_sum;
+        result -= 2000;
+        // Calculate weighted average
+        return x_sum / y_sum;
+    }
+
+    // Function to calculate error
+    void calculateError() {
+        float weighted_average = calculateWeightedAverage();
+        float errorValue = 1000 * (weighted_average - 4350);
+    }
+};
+
+class PIDController_Sensors {
+private:
+    float Kp;   // helps to increase or decrease the voltage
+    float Ki;   // helps to remove steady-state error
+    float Kd;   // helps to prevent overshoot
+    float setpoint; // the set point here refers to the desired power we wise to achieve
+    float integral; // is expressed as error integral + the accumulation of error over time
+    float prevError;    // error previous
+    float dt;   //
+
+public:
+    PIDController_Sensors(float Kp, float Kd) : Kp(Kp), Kd(Kd), integral(0), prevError(0) {}
+
+    float compute(float line_position, float last_line_position) {
+        /*
+        ************************************************************************
+        The function is to calculate the required voltage to get the DC motor to
+        the required speed.
+        ************************************************************************
+        */
+        float proportional_correction = Kp * line_position;
+        // float error = setpoint - velocity;
+        // float error = desired velocity - actual velocity;
+        dt = 0.01;
+        // float e integral = e integral + e * change in time
+        float derivative_correction = Kd * (line_position - last_line_position) / dt;
+        last_line_position = line_position;
+        // float output = Kp * error ;
+        float correction = proportional_correction + derivative_correction;
+        return correction;
+    }
+
+    void reset() {
+        integral = 0;
+        prevError = 0;
+    }
+};
+
+Sensor SC(PA_4);
+Sensor SLL(PC_1);
+Sensor SL(PB_0);
+Sensor SR(PA_1);
+Sensor SRR(PA_0);
+
+    float WeightedAverage( float sensor_output_SC,  float  sensor_output_SLL,  float sensor_output_SL,  float sensor_output_SR,  float sensor_output_SRR) {
+        float x_sum = 0, y_sum = 0, result = 0;
+        // Sensor positions and their output values
+        float sensor_positions[5] = {0, -2000, -1000, 1000, 2000};
+        float sensor_outputs[5] = {sensor_output_SC, sensor_output_SLL, sensor_output_SL, sensor_output_SR, sensor_output_SRR};
+
+        // Calculate weighted sum
+        for (int i = 0; i < 5; ++i) {
+            x_sum += sensor_positions[i] * sensor_outputs[i];
+            y_sum += sensor_outputs[i];
+        }
+        result = x_sum / y_sum;
+        result -= 2000;
+        // Calculate weighted average
+        return x_sum / y_sum;
+    }
+
+
+int main() {
+    SensorManager sensorManager(SC_pin, SRR_pin, SR_pin, SL_pin, SLL_pin);
+    PIDController_Sensors PIDController_sensors(0.1, 0.01); // Adjust PID constants as needed
+    Ticker sensorupdate_M1;
+    sensorupdate_M1.attach(callback(&sensorManager, &SensorManager::calculateError), 0.01); // Attach count_rate_M1
+
+    while (true) {
+
+    
+
+
+    // Global variables to hold maximum sensor values
+
+    // Number of iterations to find maximum values
+
+        float value_SC = SC.value();
+        if (value_SC > max_SC) max_SC = value_SC;
+
+        float value_SLL = SLL.value();
+        if (value_SLL > max_SLL) max_SLL = value_SLL;
+
+        float value_SL = SL.value();
+        if (value_SL > max_SL) max_SL = value_SL;
+
+        float value_SR = SR.value();
+        if (value_SR > max_SR) max_SR = value_SR;
+
+        float value_SRR = SRR.value();
+        if (value_SRR > max_SRR) max_SRR = value_SRR;
+    // Global variables for minimum sensor values
+
+
+float value_SC_min = SC.value();
+if (value_SC_min < min_SC) min_SC = value_SC_min;
+
+float value_SLL_min = SLL.value();
+if (value_SLL_min < min_SLL) min_SLL = value_SLL_min;
+
+float value_SL_min = SL.value();
+if (value_SL_min < min_SL) min_SL = value_SL_min;
+
+float value_SR_min = SR.value();
+if (value_SR_min < min_SR) min_SR = value_SR_min;
+
+float value_SRR_min = SRR.value();
+if (value_SRR_min < min_SRR) min_SRR = value_SRR_min;
+
+
+// After finding both max and min values, calculate scaling factors
+float scale_SC = 255.0 / (max_SC - min_SC);
+float scale_SLL = 255.0 / (max_SLL - min_SLL);
+float scale_SL = 255.0 / (max_SL - min_SL);
+float scale_SR = 255.0 / (max_SR - min_SR);
+float scale_SRR = 255.0 / (max_SRR - min_SRR);
+
+// Then, scale sensor outputs using the calculated scaling factors
+float sensor_output_SC = (SC.value() - min_SC) * scale_SC;
+float sensor_output_SLL = (SLL.value() - min_SLL) * scale_SLL;
+float sensor_output_SL = (SL.value() - min_SL) * scale_SL;
+float sensor_output_SR = (SR.value() - min_SR) * scale_SR;
+float sensor_output_SRR = (SRR.value() - min_SRR) * scale_SRR;
+        pc.printf(" scaled \r\n" );
+        pc.printf("////////////////////////////\r\n");
+        float current_lp = sensorManager.calculateWeightedAverage();
+        float current_lp_scaled = WeightedAverage(sensor_output_SC, sensor_output_SLL, sensor_output_SL, sensor_output_SR, sensor_output_SRR);
+        pc.printf("line_postion is %.2f\r\n", current_lp);
+        pc.printf("line_postion_scaled is %.2f\r\n", current_lp_scaled);
+        pc.printf("////////////////////////////\r\n");
+
+}
+        wait(1);
+    }
+
