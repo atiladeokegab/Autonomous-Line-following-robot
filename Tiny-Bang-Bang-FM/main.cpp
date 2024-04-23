@@ -28,7 +28,7 @@ public:
      
     void update() {
 
-        (S >= threshold) ? P.write(F_DC) : P.write(0.5f);
+        (S >= threshold) ? P.write(F_DC) : P.write(B_DC);
 
     }
 
