@@ -4,11 +4,11 @@
 
 #define Left_Bipolar PA_13
 #define Left_PWM PA_15
-#define SensorL NC
+#define SensorL PB_0
 
 #define Right_Bipolar PB_2
 #define Right_PWM PB_15
-#define SensorR NC
+#define SensorR PA_1
 
 class Side {
 
