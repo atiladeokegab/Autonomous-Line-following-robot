@@ -26,7 +26,7 @@ Leveraging the power of an ARM-based STM32F401 microcontroller on Keil Studio, w
 
 ### Control Algorithms and Remote Functionality
 
-![Buggy Control System Placeholder](path_to_image)
+![Buggy Control System Placeholder](Screenshot 2024-10-18 at 18.29.30.png)
 
 Our project also involved developing advanced control algorithms and remote control functionality:
 - **Sensor Array and Control**: Designed and engineered a 5-sensor array using Altium software, implementing object-oriented programming concepts and the weighted average algorithm.
