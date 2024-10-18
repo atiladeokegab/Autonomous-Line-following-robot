@@ -17,7 +17,7 @@ I am currently working on Python and C++ projects.
 
 ### System Design and Hardware Components
 
-![Buggy System Design Placeholder](Screenshot 2024-10-18 at 18.29.11.png)
+![Buggy System Design](Screenshot%202024-10-18%20at%2018.29.11.png)
 
 Leveraging the power of an ARM-based STM32F401 microcontroller on Keil Studio, we successfully implemented line-following algorithms, overcoming numerous challenges along the way. Throughout this project, I covered the entire product life cycle:
 
@@ -26,7 +26,7 @@ Leveraging the power of an ARM-based STM32F401 microcontroller on Keil Studio, w
 
 ### Control Algorithms and Remote Functionality
 
-![Buggy Control System Placeholder](Screenshot 2024-10-18 at 18.29.30.png)
+![Buggy Control System](Screenshot%202024-10-18%20at%2018.29.30.png)
 
 Our project also involved developing advanced control algorithms and remote control functionality:
 - **Sensor Array and Control**: Designed and engineered a 5-sensor array using Altium software, implementing object-oriented programming concepts and the weighted average algorithm.
