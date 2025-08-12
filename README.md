@@ -1,6 +1,6 @@
 # 💫 About Me:
 I am currently working on Python and C++ projects.
-Wrote 95 per cent of the code
+Wrote 95 
 
 ## 🌐 Socials:
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/atiladeoke/)
